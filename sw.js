@@ -1,5 +1,5 @@
-const CACHE_NAME = 'solicitudes-material-v1';
-const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/supabase.js', '/manifest.json'];
+const CACHE_NAME = 'solicitudes-material-v2';
+const ASSETS = ['/', '/index.html', '/solicitudes.html', '/style.css', '/app.js', '/supabase.js', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

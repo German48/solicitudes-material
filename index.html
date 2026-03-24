@@ -11,8 +11,15 @@
 </head>
 <body>
   <header>
-    <h1>📦 Solicitudes de Material</h1>
-    <p class="subtitulo">Departamento de Formación Profesional</p>
+    <div class="header-inner">
+      <div class="header-titles">
+        <h1>📦 Solicitudes de Material</h1>
+        <p class="subtitulo">Departamento de Formación Profesional</p>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar modo">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -30,8 +37,21 @@
             <input type="text" id="nombre_profesor" required placeholder="Nombre completo" />
           </div>
           <div class="campo">
-            <label for="grupo_curso">Grupo / Curso</label>
-            <input type="text" id="grupo_curso" placeholder="Ej: 1º DAW" />
+            <label for="grupo">Grupo *</label>
+            <select id="grupo" required>
+              <option value="" disabled selected>Selecciona…</option>
+              <option value="CFGM">CFGM — Grado Medio</option>
+              <option value="CFGS">CFGS — Grado Superior</option>
+              <option value="CFGB">CFGB — Grado Básico</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="curso">Curso *</label>
+            <select id="curso" required>
+              <option value="" disabled selected>Selecciona…</option>
+              <option value="1º">1º</option>
+              <option value="2º">2º</option>
+            </select>
           </div>
           <div class="campo">
             <label for="modulo">Módulo</label>
@@ -68,9 +88,12 @@
       </form>
     </section>
 
-    <!-- Listado -->
+    <!-- Listado rápido -->
     <section class="card" id="seccion-listado">
-      <h2>Solicitudes</h2>
+      <div class="listado-header">
+        <h2>Solicitudes</h2>
+        <a href="solicitudes.html" class="btn-ver-todas">Ver todas →</a>
+      </div>
 
       <div class="filtros">
         <div class="filtro-campo">
