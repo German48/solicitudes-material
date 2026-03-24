@@ -40,6 +40,7 @@
           <label for="filtro-modulo">Filtrar por módulo</label>
           <input type="text" id="filtro-modulo" placeholder="Nombre del módulo..." />
         </div>
+        <button id="btn-exportar-csv" class="btn-exportar">Exportar CSV</button>
       </div>
 
       <!-- Tabla en desktop -->
@@ -99,6 +100,7 @@
     const cardsContainer = document.getElementById('solicitudes-cards');
     const filtroUrgencia = document.getElementById('filtro-urgencia');
     const filtroModulo = document.getElementById('filtro-modulo');
+    let currentSolicitudes = [];
 
     const coloresUrgencia = { Normal: '#22c55e', Pronto: '#f97316', Urgente: '#ef4444' };
 
@@ -149,11 +151,38 @@
       try {
         const { getSolicitudes } = await import('./supabase.js');
         const datos = await getSolicitudes(filtroUrgencia.value, filtroModulo.value);
+        currentSolicitudes = datos;
         renderTable(datos);
       } catch (e) {
         tbody.innerHTML = `<tr><td colspan="8" class="vacio">Error: ${e.message}</td></tr>`;
       }
     }
+
+    function exportarCSV() {
+      if (!currentSolicitudes.length) return;
+      const hoy = new Date().toISOString().split('T')[0];
+      const cabecera = 'Fecha,Profesor/a,Grupo,Módulo,Material,Cantidad,Urgencia,Proyecto';
+      const filas = currentSolicitudes.map(s => [
+        s.fecha,
+        `"${(s.nombre_profesor || '').replace(/"/g, '""')}"`,
+        `"${(s.grupo_curso || '').replace(/"/g, '""')}"`,
+        `"${(s.modulo || '').replace(/"/g, '""')}"`,
+        `"${(s.material_solicitado || '').replace(/"/g, '""')}"`,
+        s.cantidad,
+        s.urgencia,
+        `"${(s.nombre_proyecto || '').replace(/"/g, '""')}"`
+      ].join(','));
+      const csv = [cabecera, ...filas].join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `solicitudes-material-${hoy}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
 
     function debounce(fn, ms) {
       let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };

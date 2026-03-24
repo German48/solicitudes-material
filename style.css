@@ -240,6 +240,23 @@ footer { text-align: center; padding: 1rem; font-size: .75rem; color: var(--text
 }
 .btn-nueva:hover { background: var(--primary-dark); }
 
+.btn-exportar {
+  display: inline-block;
+  background: #16a34a;
+  color: #fff;
+  text-decoration: none;
+  padding: .5rem 1rem;
+  border-radius: var(--radius);
+  font-size: .85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background .2s;
+  align-self: flex-end;
+}
+.btn-exportar:hover { background: #15803d; }
+
 .filtros-tabla { display: flex; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; }
 
 /* Tabla */
