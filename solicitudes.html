@@ -50,7 +50,6 @@
               <th>Fecha</th>
               <th>Profesor/a</th>
               <th>Grupo</th>
-              <th>Curso</th>
               <th>Módulo</th>
               <th>Material</th>
               <th>Cant.</th>
@@ -59,7 +58,7 @@
             </tr>
           </thead>
           <tbody id="tbody-solicitudes">
-            <tr><td colspan="9" class="vacio">Cargando…</td></tr>
+            <tr><td colspan="8" class="vacio">Cargando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -120,8 +119,7 @@
         <tr>
           <td>${s.fecha}</td>
           <td>${s.nombre_profesor}</td>
-          <td>${s.grupo || '-'}</td>
-          <td>${s.curso || '-'}</td>
+          <td>${s.grupo_curso || '-'}</td>
           <td>${s.modulo || '-'}</td>
           <td>${s.material_solicitado}</td>
           <td>${s.cantidad}</td>
@@ -138,8 +136,7 @@
             ${urgencyDot(s.urgencia)}
           </div>
           <div class="soli-card-row"><span>Fecha:</span><strong>${s.fecha}</strong></div>
-          <div class="soli-card-row"><span>Grupo:</span><strong>${s.grupo || '-'}</strong></div>
-          <div class="soli-card-row"><span>Curso:</span><strong>${s.curso || '-'}</strong></div>
+          <div class="soli-card-row"><span>Grupo:</span><strong>${s.grupo_curso || '-'}</strong></div>
           <div class="soli-card-row"><span>Módulo:</span><strong>${s.modulo || '-'}</strong></div>
           <div class="soli-card-row"><span>Proyecto:</span><strong>${s.nombre_proyecto || '-'}</strong></div>
           <div class="soli-card-row"><span>Material:</span><strong>${s.material_solicitado}</strong></div>
@@ -154,7 +151,7 @@
         const datos = await getSolicitudes(filtroUrgencia.value, filtroModulo.value);
         renderTable(datos);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="9" class="vacio">Error: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="vacio">Error: ${e.message}</td></tr>`;
       }
     }
 

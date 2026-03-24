@@ -66,8 +66,7 @@ function renderizarLista(solicitudes) {
       </div>
       <div class="solicitud-body">
         <p><strong>Fecha:</strong> ${s.fecha}</p>
-        <p><strong>Grupo:</strong> ${s.grupo || '-'}</p>
-        <p><strong>Curso:</strong> ${s.curso || '-'}</p>
+        <p><strong>Grupo:</strong> ${s.grupo_curso || '-'}</p>
         <p><strong>Módulo:</strong> ${s.modulo || '-'}</p>
         <p><strong>Proyecto:</strong> ${s.nombre_proyecto || '-'}</p>
         <p><strong>Material:</strong> ${s.material_solicitado}</p>
@@ -107,13 +106,11 @@ if (form) {
     if (mensajeExito) mensajeExito.textContent = '';
 
     const grupo = document.getElementById('grupo').value;
-    const curso = document.getElementById('curso').value;
 
     const datos = {
       fecha: document.getElementById('fecha').value,
       nombre_profesor: document.getElementById('nombre_profesor').value.trim(),
-      grupo,           // "CFGM" | "CFGS" | "CFGB"
-      curso,           // "1º" | "2º"
+      grupo_curso: grupo,
       modulo: document.getElementById('modulo').value.trim(),
       material_solicitado: document.getElementById('material_solicitado').value.trim(),
       cantidad: Number(document.getElementById('cantidad').value),
@@ -121,7 +118,7 @@ if (form) {
       nombre_proyecto: document.getElementById('nombre_proyecto').value.trim()
     };
 
-    if (!datos.nombre_profesor || !datos.material_solicitado || !grupo || !curso) {
+    if (!datos.nombre_profesor || !datos.material_solicitado) {
       if (mensajeError) mensajeError.textContent = 'Completa los campos obligatorios.';
       return;
     }
