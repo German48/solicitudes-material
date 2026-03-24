@@ -48,6 +48,7 @@
         <table id="tabla-solicitudes">
           <thead>
             <tr>
+              <th>Nº</th>
               <th>Fecha</th>
               <th>Profesor/a</th>
               <th>Grupo</th>
@@ -59,7 +60,7 @@
             </tr>
           </thead>
           <tbody id="tbody-solicitudes">
-            <tr><td colspan="8" class="vacio">Cargando…</td></tr>
+            <tr><td colspan="9" class="vacio">Cargando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -119,6 +120,7 @@
 
       tbody.innerHTML = solicitudes.map(s => `
         <tr>
+          <td><strong>${s.numero_solicitud || '-'}</strong></td>
           <td>${s.fecha}</td>
           <td>${s.nombre_profesor}</td>
           <td>${s.grupo_curso || '-'}</td>
@@ -134,7 +136,7 @@
       cardsContainer.innerHTML = solicitudes.map(s => `
         <div class="soli-card" data-urgencia="${s.urgencia}">
           <div class="soli-card-header">
-            <strong>${s.nombre_profesor}</strong>
+            <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.nombre_profesor}</strong>
             ${urgencyDot(s.urgencia)}
           </div>
           <div class="soli-card-row"><span>Fecha:</span><strong>${s.fecha}</strong></div>
@@ -154,15 +156,16 @@
         currentSolicitudes = datos;
         renderTable(datos);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="8" class="vacio">Error: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="vacio">Error: ${e.message}</td></tr>`;
       }
     }
 
     function exportarCSV() {
       if (!currentSolicitudes.length) return;
       const hoy = new Date().toISOString().split('T')[0];
-      const cabecera = 'Fecha,Profesor/a,Grupo,Módulo,Material,Cantidad,Urgencia,Proyecto';
+      const cabecera = 'Nº,Fecha,Profesor/a,Grupo,Módulo,Material,Cantidad,Urgencia,Proyecto';
       const filas = currentSolicitudes.map(s => [
+        s.numero_solicitud || '',
         s.fecha,
         `"${(s.nombre_profesor || '').replace(/"/g, '""')}"`,
         `"${(s.grupo_curso || '').replace(/"/g, '""')}"`,

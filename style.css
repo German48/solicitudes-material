@@ -334,6 +334,16 @@ tbody td:first-child { font-weight: 600; }
 .soli-card-row span { color: var(--text-light); min-width: 70px; }
 .soli-card-row strong { font-weight: 600; }
 
+/* Borrador guardado indicator */
+.borrador-indicator {
+  display: none;
+  font-size: .8rem;
+  color: var(--text-light);
+  text-align: right;
+  margin-bottom: .25rem;
+  min-height: 1.2em;
+}
+
 /* Responsive general */
 @media (max-width: 480px) {
   .form-grid { grid-template-columns: 1fr; }

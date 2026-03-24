@@ -6,6 +6,7 @@ const filtroUrgencia = document.getElementById('filtro-urgencia');
 const filtroModulo = document.getElementById('filtro-modulo');
 const mensajeError = document.getElementById('mensaje-error');
 const mensajeExito = document.getElementById('mensaje-exito');
+const borradorIndicator = document.getElementById('borrador-indicator');
 
 // ── Theme toggle ───────────────────────────────────────────
 const themeToggle = document.getElementById('theme-toggle');
@@ -31,6 +32,81 @@ themeToggle.addEventListener('click', () => {
 const fechaInput = document.getElementById('fecha');
 const hoy = new Date().toISOString().split('T')[0];
 if (fechaInput) fechaInput.value = hoy;
+
+// ── Autoguardado en localStorage ───────────────────────────
+const DRAFT_KEY = 'solicitud_material_draft';
+
+function getFormData() {
+  return {
+    fecha: document.getElementById('fecha')?.value || '',
+    nombre_profesor: document.getElementById('nombre_profesor')?.value || '',
+    grupo: document.getElementById('grupo')?.value || '',
+    modulo: document.getElementById('modulo')?.value || '',
+    nombre_proyecto: document.getElementById('nombre_proyecto')?.value || '',
+    cantidad: document.getElementById('cantidad')?.value || '1',
+    urgencia: document.getElementById('urgencia')?.value || 'Normal',
+    material_solicitado: document.getElementById('material_solicitado')?.value || ''
+  };
+}
+
+function restoreForm(data) {
+  if (!data || !form) return;
+  if (data.fecha && document.getElementById('fecha')) document.getElementById('fecha').value = data.fecha;
+  if (data.nombre_profesor && document.getElementById('nombre_profesor')) document.getElementById('nombre_profesor').value = data.nombre_profesor;
+  if (data.grupo && document.getElementById('grupo')) document.getElementById('grupo').value = data.grupo;
+  if (data.modulo && document.getElementById('modulo')) document.getElementById('modulo').value = data.modulo;
+  if (data.nombre_proyecto && document.getElementById('nombre_proyecto')) document.getElementById('nombre_proyecto').value = data.nombre_proyecto;
+  if (data.cantidad && document.getElementById('cantidad')) document.getElementById('cantidad').value = data.cantidad;
+  if (data.urgencia && document.getElementById('urgencia')) document.getElementById('urgencia').value = data.urgencia;
+  if (data.material_solicitado && document.getElementById('material_solicitado')) document.getElementById('material_solicitado').value = data.material_solicitado;
+}
+
+function guardarBorrador() {
+  if (!form) return;
+  const data = getFormData();
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  if (borradorIndicator) {
+    borradorIndicator.textContent = 'Borrador guardado';
+    borradorIndicator.style.display = 'inline';
+    clearTimeout(borradorIndicator._timeout);
+    borradorIndicator._timeout = setTimeout(() => {
+      if (borradorIndicator) borradorIndicator.style.display = 'none';
+    }, 2000);
+  }
+}
+
+function clearBorrador() {
+  localStorage.removeItem(DRAFT_KEY);
+  if (borradorIndicator) borradorIndicator.style.display = 'none';
+}
+
+// Restaurar borrador al cargar
+(function restoreDraft() {
+  try {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      restoreForm(data);
+    }
+  } catch (e) {
+    // Ignorar errores de parseo
+  }
+})();
+
+// Auto-guardar con debounce
+function debounce(fn, ms) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
+}
+
+const debouncedGuardar = debounce(guardarBorrador, 500);
+
+if (form) {
+  form.addEventListener('input', debouncedGuardar);
+}
 
 // ── Colores de urgencia ────────────────────────────────────
 const coloresUrgencia = {
@@ -60,7 +136,7 @@ function renderizarLista(solicitudes) {
     div.dataset.urgencia = s.urgencia;
     div.innerHTML = `
       <div class="solicitud-header">
-        <strong>${s.nombre_profesor}</strong>
+        <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.nombre_profesor}</strong>
         ${colorBadge(s.urgencia)}
         <button class="btn-eliminar" data-id="${s.id}" title="Eliminar">✕</button>
       </div>
@@ -124,10 +200,14 @@ if (form) {
     }
 
     try {
-      await crearSolicitud(datos);
+      const result = await crearSolicitud(datos);
+      clearBorrador();
+      const numSol = result?.numero_solicitud || '';
       if (mensajeExito) {
-        mensajeExito.textContent = '✓ Solicitud enviada correctamente.';
-        setTimeout(() => { mensajeExito.textContent = ''; }, 2000);
+        mensajeExito.textContent = numSol
+          ? `✓ Solicitud ${numSol} enviada correctamente.`
+          : '✓ Solicitud enviada correctamente.';
+        setTimeout(() => { mensajeExito.textContent = ''; }, 4000);
       }
       form.reset();
       if (fechaInput) fechaInput.value = hoy;
@@ -142,14 +222,6 @@ if (form) {
 // ── Filtros ─────────────────────────────────────────────────
 if (filtroUrgencia) filtroUrgencia.addEventListener('change', cargarSolicitudes);
 if (filtroModulo) filtroModulo.addEventListener('input', debounce(cargarSolicitudes, 400));
-
-function debounce(fn, ms) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
-}
 
 // Carga inicial (index.html)
 if (lista) cargarSolicitudes();
