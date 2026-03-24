@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solicitudes de Material — FP</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+</head>
+<body>
+  <header>
+    <h1>📦 Solicitudes de Material</h1>
+    <p class="subtitulo">Departamento de Formación Profesional</p>
+  </header>
+
+  <main>
+    <!-- Formulario -->
+    <section class="card" id="seccion-formulario">
+      <h2>Nueva Solicitud</h2>
+      <form id="form-solicitud" autocomplete="off">
+        <div class="form-grid">
+          <div class="campo">
+            <label for="fecha">Fecha *</label>
+            <input type="date" id="fecha" required />
+          </div>
+          <div class="campo">
+            <label for="nombre_profesor">Profesor/a *</label>
+            <input type="text" id="nombre_profesor" required placeholder="Nombre completo" />
+          </div>
+          <div class="campo">
+            <label for="grupo_curso">Grupo / Curso</label>
+            <input type="text" id="grupo_curso" placeholder="Ej: 1º DAW" />
+          </div>
+          <div class="campo">
+            <label for="modulo">Módulo</label>
+            <input type="text" id="modulo" placeholder="Ej: Sistemas Informáticos" />
+          </div>
+          <div class="campo">
+            <label for="nombre_proyecto">Nombre del Proyecto</label>
+            <input type="text" id="nombre_proyecto" placeholder="Ej: App Móvil" />
+          </div>
+          <div class="campo">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" id="cantidad" min="1" value="1" />
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="urgencia">Urgencia</label>
+          <select id="urgencia">
+            <option value="Normal">Normal</option>
+            <option value="Pronto">Pronto</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="material_solicitado">Material solicitado *</label>
+          <textarea id="material_solicitado" required rows="3" placeholder="Describe el material que necesitas..."></textarea>
+        </div>
+
+        <div id="mensaje-error" class="mensaje error"></div>
+        <div id="mensaje-exito" class="mensaje exito"></div>
+
+        <button type="submit" class="btn-enviar">Enviar Solicitud</button>
+      </form>
+    </section>
+
+    <!-- Listado -->
+    <section class="card" id="seccion-listado">
+      <h2>Solicitudes</h2>
+
+      <div class="filtros">
+        <div class="filtro-campo">
+          <label for="filtro-urgencia">Filtrar por urgencia</label>
+          <select id="filtro-urgencia">
+            <option value="">Todas</option>
+            <option value="Normal">Normal</option>
+            <option value="Pronto">Pronto</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="filtro-campo">
+          <label for="filtro-modulo">Filtrar por módulo</label>
+          <input type="text" id="filtro-modulo" placeholder="Nombre del módulo..." />
+        </div>
+      </div>
+
+      <div id="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Departamento de FP — PWA de Solicitudes de Material</p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
