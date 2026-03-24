@@ -230,3 +230,74 @@ if (lista) cargarSolicitudes();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+// ── PWA Install Banner ─────────────────────────────────────
+const PWA_BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';
+
+function isIOS() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function showBanner() {
+  const banner = document.getElementById('pwa-install-banner');
+  const textEl = document.getElementById('pwa-banner-text');
+  const btnEl = document.getElementById('pwa-install-btn');
+  if (!banner || !textEl) return;
+  banner.style.display = 'flex';
+
+  if (isIOS()) {
+    textEl.textContent = '📲 Para instalar en tu móvil: pulsa compartir ⬆️ y luego "Añadir a pantalla de inicio"';
+    if (btnEl) btnEl.style.display = 'none';
+  } else {
+    textEl.textContent = '📲 Instala esta app en tu móvil para acceso rápido';
+    if (btnEl) btnEl.style.display = 'inline-block';
+  }
+}
+
+function hideBanner() {
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.style.display = 'none';
+  localStorage.setItem(PWA_BANNER_DISMISSED_KEY, '1');
+}
+
+// Cerrar banner
+const bannerCloseBtn = document.getElementById('pwa-banner-close');
+if (bannerCloseBtn) {
+  bannerCloseBtn.addEventListener('click', hideBanner);
+}
+
+// Lanzar prompt de instalación
+const installBtn = document.getElementById('pwa-install-btn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') hideBanner();
+  });
+}
+
+let deferredPrompt = null;
+
+// Soporta beforeinstallprompt
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) {
+    showBanner();
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  hideBanner();
+});
+
+// Mostrar banner alternativo en iOS al cargar
+window.addEventListener('DOMContentLoaded', () => {
+  if (isIOS() && !localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) {
+    showBanner();
+  }
+});
+
