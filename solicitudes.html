@@ -41,42 +41,7 @@
           <label for="filtro-modulo">Filtrar por módulo</label>
           <select id="filtro-modulo">
             <option value="">Todos</option>
-            <option value="DDR">DDR</option>
-            <option value="DRP">DRP</option>
-            <option value="GNE">GNE</option>
-            <option value="RRC">RRC</option>
-            <option value="SOJ">SOJ</option>
-            <option value="ABD">ABD</option>
-            <option value="DHI">DHI</option>
-            <option value="DJK">DJK</option>
-            <option value="MLU">MLU</option>
-            <option value="PXE">PXE</option>
-            <option value="A10">A10</option>
-            <option value="MC4">MC4</option>
-            <option value="OAA">OAA</option>
-            <option value="PVW">PVW</option>
-            <option value="DCU">DCU</option>
-            <option value="MRN">MRN</option>
-            <option value="PUB">PUB</option>
-            <option value="SOV">SOV</option>
-            <option value="ATZ">ATZ</option>
-            <option value="EB1">EB1</option>
-            <option value="PMB">PMB</option>
-            <option value="AAD">AAD</option>
-            <option value="MCR">MCR</option>
-            <option value="OPP">OPP</option>
-            <option value="CDA">CDA</option>
-            <option value="NCI">NCI</option>
-            <option value="OPZ">OPZ</option>
-            <option value="PZ1">PZ1</option>
-            <option value="TUO">TUO</option>
-            <option value="ILB">ILB</option>
-            <option value="IUD">IUD</option>
-            <option value="TPZ">TPZ</option>
-            <option value="FAT">FAT</option>
-            <option value="IYO">IYO</option>
-            <option value="MJC">MJC</option>
-            <option value="Departamento">Departamento</option>
+            <!-- populated by JS -->
           </select>
         </div>
         <div class="filtro-campo filtro-buscador">
@@ -97,7 +62,6 @@
               <th>Grupo</th>
               <th>Módulo</th>
               <th>Material</th>
-              <th>Cant.</th>
               <th>Estado</th>
               <th>Proyecto</th>
               <th>Descripción/Enlace</th>
@@ -106,7 +70,7 @@
             </tr>
           </thead>
           <tbody id="tbody-solicitudes">
-            <tr><td colspan="12" class="vacio">Cargando…</td></tr>
+            <tr><td colspan="11" class="vacio">Cargando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -121,7 +85,7 @@
   </footer>
 
   <script>
-    // ——— Theme toggle (standalone for solicitudes.html) ———
+    // ——— Theme toggle ———
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
     function applyTheme(dark) {
@@ -138,7 +102,34 @@
       applyTheme(!document.body.classList.contains('dark'));
     });
 
-    // ——— Tabla logic ———
+    // ——— Listas cerradas ———
+    const LISTAS_KEY = 'solicitudes_listas';
+    const LISTAS_DEFAULT = {
+      docente: ['Enrique', 'Juan Carlos', 'Álvaro', 'Nico', 'Pepa', 'Laura', 'Germán', 'Saskia', 'Jonás'],
+      modulo: ['DDR', 'DRP', 'GNE', 'RRC', 'SOJ', 'ABD', 'DHI', 'DJK', 'MLU', 'PXE', 'A10', 'MC4', 'OAA', 'PVW', 'DCU', 'MRN', 'PUB', 'SOV', 'ATZ', 'EB1', 'PMB', 'AAD', 'MCR', 'OPP', 'CDA', 'NCI', 'OPZ', 'PZ1', 'TUO', 'ILB', 'IUD', 'TPZ', 'FAT', 'IYO', 'MJC', 'Departamento']
+    };
+    function getListas() {
+      try {
+        const saved = localStorage.getItem(LISTAS_KEY);
+        return saved ? JSON.parse(saved) : { ...LISTAS_DEFAULT };
+      } catch { return { ...LISTAS_DEFAULT }; }
+    }
+
+    function populateFiltroModulo() {
+      const sel = document.getElementById('filtro-modulo');
+      if (!sel) return;
+      const first = sel.options[0];
+      sel.innerHTML = '';
+      if (first) sel.appendChild(first);
+      getListas().modulo.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ——— Tabla ———
     const tbody = document.getElementById('tbody-solicitudes');
     const cardsContainer = document.getElementById('solicitudes-cards');
     const filtroEstado = document.getElementById('filtro-estado');
@@ -160,7 +151,7 @@
 
     function renderTable(solicitudes) {
       if (!solicitudes.length) {
-        tbody.innerHTML = '<tr><td colspan="12" class="vacio">No hay solicitudes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="vacio">No hay solicitudes.</td></tr>';
         cardsContainer.innerHTML = '<p class="vacio">No hay solicitudes.</p>';
         return;
       }
@@ -173,7 +164,6 @@
           <td>${s.grupo_curso || '-'}</td>
           <td>${s.modulo || '-'}</td>
           <td>${s.material_solicitado}</td>
-          <td>${s.cantidad}</td>
           <td>${estadoDot(s.urgencia || s.estado || 'Por comprar')}</td>
           <td>${s.nombre_proyecto || '-'}</td>
           <td>${s.descripcion_enlace || '-'}</td>
@@ -182,9 +172,8 @@
         </tr>
       `).join('');
 
-      // Cards móvil
       cardsContainer.innerHTML = solicitudes.map(s => `
-        <div class="soli-card" data-estado="${s.urgencia || s.estado}">
+        <div class="soli-card">
           <div class="soli-card-header">
             <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.docente || s.nombre_profesor || '-'}</strong>
             ${estadoDot(s.urgencia || s.estado || 'Por comprar')}
@@ -194,7 +183,6 @@
           <div class="soli-card-row"><span>Módulo:</span><strong>${s.modulo || '-'}</strong></div>
           <div class="soli-card-row"><span>Proyecto:</span><strong>${s.nombre_proyecto || '-'}</strong></div>
           <div class="soli-card-row"><span>Material:</span><strong>${s.material_solicitado}</strong></div>
-          <div class="soli-card-row"><span>Cantidad:</span><strong>${s.cantidad}</strong></div>
           ${s.descripcion_enlace ? `<div class="soli-card-row"><span>Descripción:</span><strong>${s.descripcion_enlace}</strong></div>` : ''}
           ${s.donde_comprar ? `<div class="soli-card-row"><span>Dónde:</span><strong>${s.donde_comprar}</strong></div>` : ''}
           ${s.comentarios ? `<div class="soli-card-row"><span>Comentarios:</span><strong>${s.comentarios}</strong></div>` : ''}
@@ -206,8 +194,6 @@
       try {
         const { getSolicitudes } = await import('./supabase.js');
         const datos = await getSolicitudes(filtroEstado.value, filtroModulo.value);
-
-        // Filtro global
         const texto = buscadorGlobal?.value?.toLowerCase() || '';
         let filtrados = datos;
         if (texto) {
@@ -222,18 +208,17 @@
             (s.comentarios || '').toLowerCase().includes(texto)
           );
         }
-
         currentSolicitudes = filtrados;
         renderTable(filtrados);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="12" class="vacio">Error: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="vacio">Error: ${e.message}</td></tr>`;
       }
     }
 
     function exportarCSV() {
       if (!currentSolicitudes.length) return;
       const hoy = new Date().toISOString().split('T')[0];
-      const cabecera = 'Nº,Fecha,Docente,Grupo,Módulo,Material,Cantidad,Estado,Proyecto,Descripción/Enlace,Dónde comprar,Comentarios';
+      const cabecera = 'Nº,Fecha,Docente,Grupo,Módulo,Material,Estado,Proyecto,Descripción/Enlace,Dónde comprar,Comentarios';
       const filas = currentSolicitudes.map(s => [
         s.numero_solicitud || '',
         s.fecha,
@@ -241,7 +226,6 @@
         `"${(s.grupo_curso || '').replace(/"/g, '""')}"`,
         `"${(s.modulo || '').replace(/"/g, '""')}"`,
         `"${(s.material_solicitado || '').replace(/"/g, '""')}"`,
-        s.cantidad,
         s.urgencia || s.estado || '',
         `"${(s.nombre_proyecto || '').replace(/"/g, '""')}"`,
         `"${(s.descripcion_enlace || '').replace(/"/g, '""')}"`,
@@ -258,20 +242,20 @@
       URL.revokeObjectURL(url);
     }
 
-    document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
+    document.getElementById('btn-exportar-csv')?.addEventListener('click', exportarCSV);
 
     function debounce(fn, ms) {
       let t;
       return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
     }
 
-    filtroEstado.addEventListener('change', cargarTabla);
-    filtroModulo.addEventListener('change', cargarTabla);
-    if (buscadorGlobal) buscadorGlobal.addEventListener('input', debounce(cargarTabla, 300));
+    filtroEstado?.addEventListener('change', cargarTabla);
+    filtroModulo?.addEventListener('change', cargarTabla);
+    buscadorGlobal?.addEventListener('input', debounce(cargarTabla, 300));
 
+    populateFiltroModulo();
     cargarTabla();
 
-    // Registrar SW
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
