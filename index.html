@@ -43,18 +43,13 @@
 
           <div class="campo">
             <label for="docente">Docente *</label>
-            <select id="docente" required>
-              <option value="">Seleccionar docente...</option>
-              <option value="Enrique">Enrique</option>
-              <option value="Juan Carlos">Juan Carlos</option>
-              <option value="Álvaro">Álvaro</option>
-              <option value="Nico">Nico</option>
-              <option value="Pepa">Pepa</option>
-              <option value="Laura">Laura</option>
-              <option value="Germán">Germán</option>
-              <option value="Saskia">Saskia</option>
-              <option value="Jonás">Jonás</option>
-            </select>
+            <div class="select-con-gestion">
+              <select id="docente" required>
+                <option value="">Seleccionar docente...</option>
+                <!-- options injected by JS -->
+              </select>
+              <button type="button" class="btn-gestionar" data-target="docente" title="Gestionar docentes">⚙</button>
+            </div>
           </div>
 
           <div class="campo">
@@ -73,55 +68,18 @@
 
           <div class="campo">
             <label for="modulo">Módulo</label>
-            <select id="modulo">
-              <option value="">Seleccionar módulo...</option>
-              <option value="DDR">DDR</option>
-              <option value="DRP">DRP</option>
-              <option value="GNE">GNE</option>
-              <option value="RRC">RRC</option>
-              <option value="SOJ">SOJ</option>
-              <option value="ABD">ABD</option>
-              <option value="DHI">DHI</option>
-              <option value="DJK">DJK</option>
-              <option value="MLU">MLU</option>
-              <option value="PXE">PXE</option>
-              <option value="A10">A10</option>
-              <option value="MC4">MC4</option>
-              <option value="OAA">OAA</option>
-              <option value="PVW">PVW</option>
-              <option value="DCU">DCU</option>
-              <option value="MRN">MRN</option>
-              <option value="PUB">PUB</option>
-              <option value="SOV">SOV</option>
-              <option value="ATZ">ATZ</option>
-              <option value="EB1">EB1</option>
-              <option value="PMB">PMB</option>
-              <option value="AAD">AAD</option>
-              <option value="MCR">MCR</option>
-              <option value="OPP">OPP</option>
-              <option value="CDA">CDA</option>
-              <option value="NCI">NCI</option>
-              <option value="OPZ">OPZ</option>
-              <option value="PZ1">PZ1</option>
-              <option value="TUO">TUO</option>
-              <option value="ILB">ILB</option>
-              <option value="IUD">IUD</option>
-              <option value="TPZ">TPZ</option>
-              <option value="FAT">FAT</option>
-              <option value="IYO">IYO</option>
-              <option value="MJC">MJC</option>
-              <option value="Departamento">Departamento</option>
-            </select>
+            <div class="select-con-gestion">
+              <select id="modulo">
+                <option value="">Seleccionar módulo...</option>
+                <!-- options injected by JS -->
+              </select>
+              <button type="button" class="btn-gestionar" data-target="modulo" title="Gestionar módulos">⚙</button>
+            </div>
           </div>
 
           <div class="campo">
             <label for="nombre_proyecto">Nombre del Proyecto</label>
-            <input type="text" id="nombre_proyecto" placeholder="Ej: App Móvil" />
-          </div>
-
-          <div class="campo">
-            <label for="cantidad">Cantidad</label>
-            <input type="number" id="cantidad" min="1" value="1" />
+            <input type="text" id="nombre_proyecto" placeholder="Ej: Taburete" />
           </div>
         </div>
 
@@ -187,42 +145,7 @@
           <label for="filtro-modulo">Filtrar por módulo</label>
           <select id="filtro-modulo">
             <option value="">Todos</option>
-            <option value="DDR">DDR</option>
-            <option value="DRP">DRP</option>
-            <option value="GNE">GNE</option>
-            <option value="RRC">RRC</option>
-            <option value="SOJ">SOJ</option>
-            <option value="ABD">ABD</option>
-            <option value="DHI">DHI</option>
-            <option value="DJK">DJK</option>
-            <option value="MLU">MLU</option>
-            <option value="PXE">PXE</option>
-            <option value="A10">A10</option>
-            <option value="MC4">MC4</option>
-            <option value="OAA">OAA</option>
-            <option value="PVW">PVW</option>
-            <option value="DCU">DCU</option>
-            <option value="MRN">MRN</option>
-            <option value="PUB">PUB</option>
-            <option value="SOV">SOV</option>
-            <option value="ATZ">ATZ</option>
-            <option value="EB1">EB1</option>
-            <option value="PMB">PMB</option>
-            <option value="AAD">AAD</option>
-            <option value="MCR">MCR</option>
-            <option value="OPP">OPP</option>
-            <option value="CDA">CDA</option>
-            <option value="NCI">NCI</option>
-            <option value="OPZ">OPZ</option>
-            <option value="PZ1">PZ1</option>
-            <option value="TUO">TUO</option>
-            <option value="ILB">ILB</option>
-            <option value="IUD">IUD</option>
-            <option value="TPZ">TPZ</option>
-            <option value="FAT">FAT</option>
-            <option value="IYO">IYO</option>
-            <option value="MJC">MJC</option>
-            <option value="Departamento">Departamento</option>
+            <!-- options injected by JS -->
           </select>
         </div>
         <div class="filtro-campo filtro-buscador">
@@ -236,6 +159,23 @@
       </div>
     </section>
   </main>
+
+  <!-- Modal gestionar opciones -->
+  <div id="modal-gestionar" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-titulo">Gestionar</h3>
+        <button id="modal-cerrar" class="modal-cerrar" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="gestion-lista" id="gestion-lista"></div>
+        <div class="gestion-add">
+          <input type="text" id="gestion-nuevo" placeholder="Nuevo valor..." />
+          <button type="button" id="btn-add-opcion">Añadir</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <footer>
     <p>Departamento de FP — PWA de Solicitudes de Material</p>
