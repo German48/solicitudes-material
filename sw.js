@@ -1,5 +1,15 @@
-const CACHE_NAME = 'solicitudes-material-v2';
-const ASSETS = ['/', '/index.html', '/solicitudes.html', '/style.css', '/app.js', '/supabase.js', '/manifest.json'];
+const CACHE_NAME = 'solicitudes-material-v3';
+const ASSETS = [
+  './',
+  './index.html',
+  './solicitudes.html',
+  './style.css',
+  './app.js',
+  './supabase.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -19,7 +29,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   event.respondWith(
     fetch(event.request)
       .then(response => {
