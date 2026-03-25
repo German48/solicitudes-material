@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Telegram</title>
+</head>
+<body>
+  <h1>Test Telegram</h1>
+  <button id="btn">Enviar test a Telegram</button>
+  <pre id="resultado" style="background:#eee;padding:1rem;margin-top:1rem;white-space:pre-wrap"></pre>
+  <script type="module">
+    const URL = 'https://orypvcwpeomplyhqwzdh.supabase.co/functions/v1/notify-telegram';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXB2Y3dwZW9tcGx5aHF3emRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDE4OTUsImV4cCI6MjA4NTM3Nzg5NX0.WUB5SAQPGdbQQgKWsoxGnxjKGWq9iUNUlTG19SWhhk8';
+
+    document.getElementById('btn').addEventListener('click', async () => {
+      const resultado = document.getElementById('resultado');
+      resultado.textContent = 'Enviando...';
+
+      const body = JSON.stringify({
+        numero_solicitud: 'SOL-2526-TEST',
+        nombre_profesor: 'Test GerBot',
+        grupo: '1º CFGM',
+        modulo: 'PMB',
+        material: 'Prueba desde test-telegram.html',
+        cantidad: 1,
+        urgencia: 'Por comprar',
+        proyecto: 'Test',
+        fecha: '2026-03-25'
+      });
+
+      try {
+        const res = await fetch(URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + ANON_KEY
+          },
+          body
+        });
+        const data = await res.json();
+        resultado.textContent = `Status: ${res.status}\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        resultado.textContent = 'Error de red: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
