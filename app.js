@@ -2,8 +2,9 @@ import { getSolicitudes, crearSolicitud, eliminarSolicitud } from './supabase.js
 
 const form = document.getElementById('form-solicitud');
 const lista = document.getElementById('lista-solicitudes');
-const filtroUrgencia = document.getElementById('filtro-urgencia');
+const filtroEstado = document.getElementById('filtro-estado');
 const filtroModulo = document.getElementById('filtro-modulo');
+const buscadorGlobal = document.getElementById('buscador-global');
 const mensajeError = document.getElementById('mensaje-error');
 const mensajeExito = document.getElementById('mensaje-exito');
 const borradorIndicator = document.getElementById('borrador-indicator');
@@ -39,26 +40,32 @@ const DRAFT_KEY = 'solicitud_material_draft';
 function getFormData() {
   return {
     fecha: document.getElementById('fecha')?.value || '',
-    nombre_profesor: document.getElementById('nombre_profesor')?.value || '',
+    docente: document.getElementById('docente')?.value || '',
     grupo: document.getElementById('grupo')?.value || '',
     modulo: document.getElementById('modulo')?.value || '',
     nombre_proyecto: document.getElementById('nombre_proyecto')?.value || '',
     cantidad: document.getElementById('cantidad')?.value || '1',
-    urgencia: document.getElementById('urgencia')?.value || 'Normal',
-    material_solicitado: document.getElementById('material_solicitado')?.value || ''
+    estado: document.getElementById('estado')?.value || 'Por comprar',
+    material_solicitado: document.getElementById('material_solicitado')?.value || '',
+    descripcion_enlace: document.getElementById('descripcion_enlace')?.value || '',
+    donde_comprar: document.getElementById('donde_comprar')?.value || '',
+    comentarios: document.getElementById('comentarios')?.value || ''
   };
 }
 
 function restoreForm(data) {
   if (!data || !form) return;
   if (data.fecha && document.getElementById('fecha')) document.getElementById('fecha').value = data.fecha;
-  if (data.nombre_profesor && document.getElementById('nombre_profesor')) document.getElementById('nombre_profesor').value = data.nombre_profesor;
+  if (data.docente && document.getElementById('docente')) document.getElementById('docente').value = data.docente;
   if (data.grupo && document.getElementById('grupo')) document.getElementById('grupo').value = data.grupo;
   if (data.modulo && document.getElementById('modulo')) document.getElementById('modulo').value = data.modulo;
   if (data.nombre_proyecto && document.getElementById('nombre_proyecto')) document.getElementById('nombre_proyecto').value = data.nombre_proyecto;
   if (data.cantidad && document.getElementById('cantidad')) document.getElementById('cantidad').value = data.cantidad;
-  if (data.urgencia && document.getElementById('urgencia')) document.getElementById('urgencia').value = data.urgencia;
+  if (data.estado && document.getElementById('estado')) document.getElementById('estado').value = data.estado;
   if (data.material_solicitado && document.getElementById('material_solicitado')) document.getElementById('material_solicitado').value = data.material_solicitado;
+  if (data.descripcion_enlace && document.getElementById('descripcion_enlace')) document.getElementById('descripcion_enlace').value = data.descripcion_enlace;
+  if (data.donde_comprar && document.getElementById('donde_comprar')) document.getElementById('donde_comprar').value = data.donde_comprar;
+  if (data.comentarios && document.getElementById('comentarios')) document.getElementById('comentarios').value = data.comentarios;
 }
 
 function guardarBorrador() {
@@ -103,21 +110,21 @@ function debounce(fn, ms) {
 }
 
 const debouncedGuardar = debounce(guardarBorrador, 500);
-
 if (form) {
   form.addEventListener('input', debouncedGuardar);
 }
 
-// ── Colores de urgencia ────────────────────────────────────
-const coloresUrgencia = {
-  Normal: '#22c55e',
-  Pronto: '#f97316',
-  Urgente: '#ef4444'
+// ── Colores de estado ────────────────────────────────────
+const coloresEstado = {
+  'Por comprar': '#f97316',
+  'Comprado': '#3b82f6',
+  'Recibido': '#22c55e',
+  'Anulado': '#6b7280'
 };
 
-function colorBadge(urgencia) {
-  const color = coloresUrgencia[urgencia] || '#6b7280';
-  return `<span class="badge" style="background:${color}">${urgencia}</span>`;
+function colorBadge(estado) {
+  const color = coloresEstado[estado] || '#6b7280';
+  return `<span class="badge" style="background:${color}">${estado}</span>`;
 }
 
 // ── Renderizar lista (cards) ────────────────────────────────
@@ -126,18 +133,18 @@ function renderizarLista(solicitudes) {
   lista.innerHTML = '';
 
   if (solicitudes.length === 0) {
-    lista.innerHTML = '<p class="vacio">No hay solicitudes aún.</p>';
+    lista.innerHTML = '<p class="vacio">No hay solicitudes que coincidan.</p>';
     return;
   }
 
   solicitudes.forEach(s => {
     const div = document.createElement('div');
     div.className = 'solicitud-card';
-    div.dataset.urgencia = s.urgencia;
+    div.dataset.estado = s.estado;
     div.innerHTML = `
       <div class="solicitud-header">
-        <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.nombre_profesor}</strong>
-        ${colorBadge(s.urgencia)}
+        <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.docente || s.nombre_profesor || '-'}</strong>
+        ${colorBadge(s.estado)}
         <button class="btn-eliminar" data-id="${s.id}" title="Eliminar">✕</button>
       </div>
       <div class="solicitud-body">
@@ -147,6 +154,9 @@ function renderizarLista(solicitudes) {
         <p><strong>Proyecto:</strong> ${s.nombre_proyecto || '-'}</p>
         <p><strong>Material:</strong> ${s.material_solicitado}</p>
         <p><strong>Cantidad:</strong> ${s.cantidad}</p>
+        ${s.descripcion_enlace ? `<p><strong>Descripción:</strong> ${s.descripcion_enlace}</p>` : ''}
+        ${s.donde_comprar ? `<p><strong>Dónde comprar:</strong> ${s.donde_comprar}</p>` : ''}
+        ${s.comentarios ? `<p><strong>Comentarios:</strong> ${s.comentarios}</p>` : ''}
       </div>
     `;
     lista.appendChild(div);
@@ -166,7 +176,26 @@ function renderizarLista(solicitudes) {
 async function cargarSolicitudes() {
   if (!lista) return;
   try {
-    const datos = await getSolicitudes(filtroUrgencia?.value || '', filtroModulo?.value || '');
+    const estadoFiltro = filtroEstado?.value || '';
+    const moduloFiltro = filtroModulo?.value || '';
+    const textoBuscador = buscadorGlobal?.value?.toLowerCase() || '';
+
+    let datos = await getSolicitudes(estadoFiltro, moduloFiltro);
+
+    // Filtro global adicional
+    if (textoBuscador) {
+      datos = datos.filter(s =>
+        (s.docente || s.nombre_profesor || '').toLowerCase().includes(textoBuscador) ||
+        (s.material_solicitado || '').toLowerCase().includes(textoBuscador) ||
+        (s.modulo || '').toLowerCase().includes(textoBuscador) ||
+        (s.grupo_curso || '').toLowerCase().includes(textoBuscador) ||
+        (s.nombre_proyecto || '').toLowerCase().includes(textoBuscador) ||
+        (s.descripcion_enlace || '').toLowerCase().includes(textoBuscador) ||
+        (s.donde_comprar || '').toLowerCase().includes(textoBuscador) ||
+        (s.comentarios || '').toLowerCase().includes(textoBuscador)
+      );
+    }
+
     renderizarLista(datos);
     if (mensajeError) mensajeError.textContent = '';
   } catch (e) {
@@ -181,17 +210,18 @@ if (form) {
     if (mensajeError) mensajeError.textContent = '';
     if (mensajeExito) mensajeExito.textContent = '';
 
-    const grupo = document.getElementById('grupo').value;
-
     const datos = {
       fecha: document.getElementById('fecha').value,
-      nombre_profesor: document.getElementById('nombre_profesor').value.trim(),
-      grupo_curso: grupo,
-      modulo: document.getElementById('modulo').value.trim(),
+      nombre_profesor: document.getElementById('docente').value.trim(),
+      grupo_curso: document.getElementById('grupo').value,
+      modulo: document.getElementById('modulo').value,
       material_solicitado: document.getElementById('material_solicitado').value.trim(),
       cantidad: Number(document.getElementById('cantidad').value),
-      urgencia: document.getElementById('urgencia').value,
-      nombre_proyecto: document.getElementById('nombre_proyecto').value.trim()
+      urgencia: document.getElementById('estado').value, // mantener compatibilidd con BDD
+      nombre_proyecto: document.getElementById('nombre_proyecto').value.trim(),
+      descripcion_enlace: document.getElementById('descripcion_enlace').value.trim(),
+      donde_comprar: document.getElementById('donde_comprar').value.trim(),
+      comentarios: document.getElementById('comentarios').value.trim()
     };
 
     if (!datos.nombre_profesor || !datos.material_solicitado) {
@@ -204,9 +234,7 @@ if (form) {
       clearBorrador();
       const numSol = result?.numero_solicitud || '';
       if (mensajeExito) {
-        mensajeExito.textContent = numSol
-          ? `✓ Solicitud ${numSol} enviada correctamente.`
-          : '✓ Solicitud enviada correctamente.';
+        mensajeExito.textContent = numSol ? `✓ Solicitud ${numSol} enviada correctamente.` : '✓ Solicitud enviada correctamente.';
         setTimeout(() => { mensajeExito.textContent = ''; }, 4000);
       }
       form.reset();
@@ -220,8 +248,9 @@ if (form) {
 }
 
 // ── Filtros ─────────────────────────────────────────────────
-if (filtroUrgencia) filtroUrgencia.addEventListener('change', cargarSolicitudes);
-if (filtroModulo) filtroModulo.addEventListener('input', debounce(cargarSolicitudes, 400));
+if (filtroEstado) filtroEstado.addEventListener('change', cargarSolicitudes);
+if (filtroModulo) filtroModulo.addEventListener('change', cargarSolicitudes);
+if (buscadorGlobal) buscadorGlobal.addEventListener('input', debounce(cargarSolicitudes, 300));
 
 // Carga inicial (index.html)
 if (lista) cargarSolicitudes();
@@ -244,7 +273,6 @@ function showBanner() {
   const btnEl = document.getElementById('pwa-install-btn');
   if (!banner || !textEl) return;
   banner.style.display = 'flex';
-
   if (isIOS()) {
     textEl.textContent = '📲 Para instalar en tu móvil: pulsa compartir ⬆️ y luego "Añadir a pantalla de inicio"';
     if (btnEl) btnEl.style.display = 'none';
@@ -260,27 +288,12 @@ function hideBanner() {
   localStorage.setItem(PWA_BANNER_DISMISSED_KEY, '1');
 }
 
-// Cerrar banner
 const bannerCloseBtn = document.getElementById('pwa-banner-close');
 if (bannerCloseBtn) {
   bannerCloseBtn.addEventListener('click', hideBanner);
 }
 
-// Lanzar prompt de instalación
-const installBtn = document.getElementById('pwa-install-btn');
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    if (outcome === 'accepted') hideBanner();
-  });
-}
-
 let deferredPrompt = null;
-
-// Soporta beforeinstallprompt
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
@@ -294,10 +307,8 @@ window.addEventListener('appinstalled', () => {
   hideBanner();
 });
 
-// Mostrar banner alternativo en iOS al cargar
 window.addEventListener('DOMContentLoaded', () => {
   if (isIOS() && !localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) {
     showBanner();
   }
 });
-
