@@ -28,17 +28,60 @@
 
       <div class="filtros-tabla">
         <div class="filtro-campo">
-          <label for="filtro-urgencia">Filtrar por urgencia</label>
-          <select id="filtro-urgencia">
+          <label for="filtro-estado">Filtrar por estado</label>
+          <select id="filtro-estado">
             <option value="">Todas</option>
-            <option value="Normal">Normal</option>
-            <option value="Pronto">Pronto</option>
-            <option value="Urgente">Urgente</option>
+            <option value="Por comprar">Por comprar</option>
+            <option value="Comprado">Comprado</option>
+            <option value="Recibido">Recibido</option>
+            <option value="Anulado">Anulado</option>
           </select>
         </div>
         <div class="filtro-campo">
           <label for="filtro-modulo">Filtrar por módulo</label>
-          <input type="text" id="filtro-modulo" placeholder="Nombre del módulo..." />
+          <select id="filtro-modulo">
+            <option value="">Todos</option>
+            <option value="DDR">DDR</option>
+            <option value="DRP">DRP</option>
+            <option value="GNE">GNE</option>
+            <option value="RRC">RRC</option>
+            <option value="SOJ">SOJ</option>
+            <option value="ABD">ABD</option>
+            <option value="DHI">DHI</option>
+            <option value="DJK">DJK</option>
+            <option value="MLU">MLU</option>
+            <option value="PXE">PXE</option>
+            <option value="A10">A10</option>
+            <option value="MC4">MC4</option>
+            <option value="OAA">OAA</option>
+            <option value="PVW">PVW</option>
+            <option value="DCU">DCU</option>
+            <option value="MRN">MRN</option>
+            <option value="PUB">PUB</option>
+            <option value="SOV">SOV</option>
+            <option value="ATZ">ATZ</option>
+            <option value="EB1">EB1</option>
+            <option value="PMB">PMB</option>
+            <option value="AAD">AAD</option>
+            <option value="MCR">MCR</option>
+            <option value="OPP">OPP</option>
+            <option value="CDA">CDA</option>
+            <option value="NCI">NCI</option>
+            <option value="OPZ">OPZ</option>
+            <option value="PZ1">PZ1</option>
+            <option value="TUO">TUO</option>
+            <option value="ILB">ILB</option>
+            <option value="IUD">IUD</option>
+            <option value="TPZ">TPZ</option>
+            <option value="FAT">FAT</option>
+            <option value="IYO">IYO</option>
+            <option value="MJC">MJC</option>
+            <option value="Departamento">Departamento</option>
+          </select>
+        </div>
+        <div class="filtro-campo filtro-buscador">
+          <label for="buscador-global">Buscar</label>
+          <input type="text" id="buscador-global" placeholder="Buscar en toda la tabla..." />
         </div>
         <button id="btn-exportar-csv" class="btn-exportar">Exportar CSV</button>
       </div>
@@ -50,17 +93,20 @@
             <tr>
               <th>Nº</th>
               <th>Fecha</th>
-              <th>Profesor/a</th>
+              <th>Docente</th>
               <th>Grupo</th>
               <th>Módulo</th>
               <th>Material</th>
               <th>Cant.</th>
-              <th>Urgencia</th>
+              <th>Estado</th>
               <th>Proyecto</th>
+              <th>Descripción/Enlace</th>
+              <th>Dónde comprar</th>
+              <th>Comentarios</th>
             </tr>
           </thead>
           <tbody id="tbody-solicitudes">
-            <tr><td colspan="9" class="vacio">Cargando…</td></tr>
+            <tr><td colspan="12" class="vacio">Cargando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -74,24 +120,20 @@
     <p>Departamento de FP — PWA de Solicitudes de Material</p>
   </footer>
 
-  <script type="module" src="app.js"></script>
   <script>
     // ——— Theme toggle (standalone for solicitudes.html) ———
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
-
     function applyTheme(dark) {
       document.body.classList.toggle('dark', dark);
       themeIcon.textContent = dark ? '☀️' : '🌙';
       localStorage.setItem('theme', dark ? 'dark' : 'light');
     }
-
     (function initTheme() {
       const saved = localStorage.getItem('theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       applyTheme(saved === 'dark' || (!saved && prefersDark));
     })();
-
     themeToggle.addEventListener('click', () => {
       applyTheme(!document.body.classList.contains('dark'));
     });
@@ -99,21 +141,26 @@
     // ——— Tabla logic ———
     const tbody = document.getElementById('tbody-solicitudes');
     const cardsContainer = document.getElementById('solicitudes-cards');
-    const filtroUrgencia = document.getElementById('filtro-urgencia');
+    const filtroEstado = document.getElementById('filtro-estado');
     const filtroModulo = document.getElementById('filtro-modulo');
+    const buscadorGlobal = document.getElementById('buscador-global');
     let currentSolicitudes = [];
 
-    const coloresUrgencia = { Normal: '#22c55e', Pronto: '#f97316', Urgente: '#ef4444' };
+    const coloresEstado = {
+      'Por comprar': '#f97316',
+      'Comprado': '#3b82f6',
+      'Recibido': '#22c55e',
+      'Anulado': '#6b7280'
+    };
 
-    function urgencyDot(urgencia) {
-      const color = coloresUrgencia[urgencia] || '#6b7280';
-      return `<span class="urgency-dot ${urgencia}" style="background:${color}"></span>${urgencia}`;
+    function estadoDot(estado) {
+      const color = coloresEstado[estado] || '#6b7280';
+      return `<span class="urgency-dot" style="background:${color}"></span>${estado}`;
     }
 
     function renderTable(solicitudes) {
-      // Tabla
       if (!solicitudes.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="vacio">No hay solicitudes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="vacio">No hay solicitudes.</td></tr>';
         cardsContainer.innerHTML = '<p class="vacio">No hay solicitudes.</p>';
         return;
       }
@@ -122,22 +169,25 @@
         <tr>
           <td><strong>${s.numero_solicitud || '-'}</strong></td>
           <td>${s.fecha}</td>
-          <td>${s.nombre_profesor}</td>
+          <td>${s.docente || s.nombre_profesor || '-'}</td>
           <td>${s.grupo_curso || '-'}</td>
           <td>${s.modulo || '-'}</td>
           <td>${s.material_solicitado}</td>
           <td>${s.cantidad}</td>
-          <td>${urgencyDot(s.urgencia)}</td>
+          <td>${estadoDot(s.urgencia || s.estado || 'Por comprar')}</td>
           <td>${s.nombre_proyecto || '-'}</td>
+          <td>${s.descripcion_enlace || '-'}</td>
+          <td>${s.donde_comprar || '-'}</td>
+          <td>${s.comentarios || '-'}</td>
         </tr>
       `).join('');
 
       // Cards móvil
       cardsContainer.innerHTML = solicitudes.map(s => `
-        <div class="soli-card" data-urgencia="${s.urgencia}">
+        <div class="soli-card" data-estado="${s.urgencia || s.estado}">
           <div class="soli-card-header">
-            <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.nombre_profesor}</strong>
-            ${urgencyDot(s.urgencia)}
+            <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.docente || s.nombre_profesor || '-'}</strong>
+            ${estadoDot(s.urgencia || s.estado || 'Por comprar')}
           </div>
           <div class="soli-card-row"><span>Fecha:</span><strong>${s.fecha}</strong></div>
           <div class="soli-card-row"><span>Grupo:</span><strong>${s.grupo_curso || '-'}</strong></div>
@@ -145,6 +195,9 @@
           <div class="soli-card-row"><span>Proyecto:</span><strong>${s.nombre_proyecto || '-'}</strong></div>
           <div class="soli-card-row"><span>Material:</span><strong>${s.material_solicitado}</strong></div>
           <div class="soli-card-row"><span>Cantidad:</span><strong>${s.cantidad}</strong></div>
+          ${s.descripcion_enlace ? `<div class="soli-card-row"><span>Descripción:</span><strong>${s.descripcion_enlace}</strong></div>` : ''}
+          ${s.donde_comprar ? `<div class="soli-card-row"><span>Dónde:</span><strong>${s.donde_comprar}</strong></div>` : ''}
+          ${s.comentarios ? `<div class="soli-card-row"><span>Comentarios:</span><strong>${s.comentarios}</strong></div>` : ''}
         </div>
       `).join('');
     }
@@ -152,28 +205,48 @@
     async function cargarTabla() {
       try {
         const { getSolicitudes } = await import('./supabase.js');
-        const datos = await getSolicitudes(filtroUrgencia.value, filtroModulo.value);
-        currentSolicitudes = datos;
-        renderTable(datos);
+        const datos = await getSolicitudes(filtroEstado.value, filtroModulo.value);
+
+        // Filtro global
+        const texto = buscadorGlobal?.value?.toLowerCase() || '';
+        let filtrados = datos;
+        if (texto) {
+          filtrados = datos.filter(s =>
+            (s.docente || s.nombre_profesor || '').toLowerCase().includes(texto) ||
+            (s.material_solicitado || '').toLowerCase().includes(texto) ||
+            (s.modulo || '').toLowerCase().includes(texto) ||
+            (s.grupo_curso || '').toLowerCase().includes(texto) ||
+            (s.nombre_proyecto || '').toLowerCase().includes(texto) ||
+            (s.descripcion_enlace || '').toLowerCase().includes(texto) ||
+            (s.donde_comprar || '').toLowerCase().includes(texto) ||
+            (s.comentarios || '').toLowerCase().includes(texto)
+          );
+        }
+
+        currentSolicitudes = filtrados;
+        renderTable(filtrados);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="9" class="vacio">Error: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="vacio">Error: ${e.message}</td></tr>`;
       }
     }
 
     function exportarCSV() {
       if (!currentSolicitudes.length) return;
       const hoy = new Date().toISOString().split('T')[0];
-      const cabecera = 'Nº,Fecha,Profesor/a,Grupo,Módulo,Material,Cantidad,Urgencia,Proyecto';
+      const cabecera = 'Nº,Fecha,Docente,Grupo,Módulo,Material,Cantidad,Estado,Proyecto,Descripción/Enlace,Dónde comprar,Comentarios';
       const filas = currentSolicitudes.map(s => [
         s.numero_solicitud || '',
         s.fecha,
-        `"${(s.nombre_profesor || '').replace(/"/g, '""')}"`,
+        `"${(s.docente || s.nombre_profesor || '').replace(/"/g, '""')}"`,
         `"${(s.grupo_curso || '').replace(/"/g, '""')}"`,
         `"${(s.modulo || '').replace(/"/g, '""')}"`,
         `"${(s.material_solicitado || '').replace(/"/g, '""')}"`,
         s.cantidad,
-        s.urgencia,
-        `"${(s.nombre_proyecto || '').replace(/"/g, '""')}"`
+        s.urgencia || s.estado || '',
+        `"${(s.nombre_proyecto || '').replace(/"/g, '""')}"`,
+        `"${(s.descripcion_enlace || '').replace(/"/g, '""')}"`,
+        `"${(s.donde_comprar || '').replace(/"/g, '""')}"`,
+        `"${(s.comentarios || '').replace(/"/g, '""')}"`
       ].join(','));
       const csv = [cabecera, ...filas].join('\r\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -188,11 +261,13 @@
     document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
 
     function debounce(fn, ms) {
-      let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+      let t;
+      return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
     }
 
-    filtroUrgencia.addEventListener('change', cargarTabla);
-    filtroModulo.addEventListener('input', debounce(cargarTabla, 400));
+    filtroEstado.addEventListener('change', cargarTabla);
+    filtroModulo.addEventListener('change', cargarTabla);
+    if (buscadorGlobal) buscadorGlobal.addEventListener('input', debounce(cargarTabla, 300));
 
     cargarTabla();
 
