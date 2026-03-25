@@ -1,7 +1,6 @@
 const SUPABASE_URL = 'https://orypvcwpeomplyhqwzdh.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXB2Y3dwZW9tcGx5aHF3emRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDE4OTUsImV4cCI6MjA4NTM3Nzg5NX0.WUB5SAQPGdbQQgKWsoxGnxjKGWq9iUNUlTG19SWhhk8';
 const SUPABASE_EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/notify-telegram`;
-
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function getSolicitudes(filtroUrgencia = '', filtroModulo = '') {
@@ -46,7 +45,7 @@ async function crearSolicitud(solicitud) {
 
   // 3. Notificar por Telegram (Edge Function)
   try {
-    await fetch(SUPABASE_EDGE_FUNCTION_URL, {
+    const notifyRes = await fetch(SUPABASE_EDGE_FUNCTION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,9 +63,14 @@ async function crearSolicitud(solicitud) {
         fecha: solicitud.fecha
       })
     });
+    const notifyData = await notifyRes.json();
+    if (!notifyRes.ok) {
+      console.error('Telegram notification failed:', notifyData);
+      // No lanzamos error — la solicitud ya se guardó
+    }
   } catch (notifyErr) {
-    // No bloqueamos el éxito si falla Telegram, solo lo registramos
-    console.warn('Notificación Telegram no enviada:', notifyErr);
+    console.error('Telegram notification error:', notifyErr);
+    // No bloqueamos — la solicitud ya se guardó
   }
 
   return data;
