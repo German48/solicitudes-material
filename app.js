@@ -9,6 +9,120 @@ const mensajeError = document.getElementById('mensaje-error');
 const mensajeExito = document.getElementById('mensaje-exito');
 const borradorIndicator = document.getElementById('borrador-indicator');
 
+// ── Listas cerradas persistidas en localStorage ─────────────
+const LISTAS_KEY = 'solicitudes_listas';
+
+const LISTAS_DEFAULT = {
+  docente: ['Enrique', 'Juan Carlos', 'Álvaro', 'Nico', 'Pepa', 'Laura', 'Germán', 'Saskia', 'Jonás'],
+  modulo: ['DDR', 'DRP', 'GNE', 'RRC', 'SOJ', 'ABD', 'DHI', 'DJK', 'MLU', 'PXE', 'A10', 'MC4', 'OAA', 'PVW', 'DCU', 'MRN', 'PUB', 'SOV', 'ATZ', 'EB1', 'PMB', 'AAD', 'MCR', 'OPP', 'CDA', 'NCI', 'OPZ', 'PZ1', 'TUO', 'ILB', 'IUD', 'TPZ', 'FAT', 'IYO', 'MJC', 'Departamento']
+};
+
+function getListas() {
+  try {
+    const saved = localStorage.getItem(LISTAS_KEY);
+    return saved ? JSON.parse(saved) : { ...LISTAS_DEFAULT };
+  } catch { return { ...LISTAS_DEFAULT }; }
+}
+
+function saveListas(listas) {
+  localStorage.setItem(LISTAS_KEY, JSON.stringify(listas));
+}
+
+// ── Poblar selects dinámicamente ──────────────────────────
+function populateSelect(id, valores, selectedValue = '') {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  // Solo toca las options generadas por nosotros (marcadas con data-dynamic)
+  const firstRealOption = sel.options[0];
+  sel.innerHTML = '';
+  if (firstRealOption) sel.appendChild(firstRealOption);
+  valores.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    if (v === selectedValue) opt.selected = true;
+    opt.dataset.dynamic = '1';
+    sel.appendChild(opt);
+  });
+}
+
+function populateAllSelects(selectedDocente = '', selectedModulo = '') {
+  const listas = getListas();
+  populateSelect('docente', listas.docente, selectedDocente);
+  populateSelect('modulo', listas.modulo, selectedModulo);
+  populateSelect('filtro-modulo', ['', ...listas.modulo], filtroModulo?.value || '');
+}
+
+// ── Modal gestionar opciones ────────────────────────────────
+let modalTarget = null; // 'docente' | 'modulo'
+
+function abrirModal(tipo) {
+  modalTarget = tipo;
+  const listas = getListas();
+  const items = listas[tipo] || [];
+  const titulo = document.getElementById('modal-titulo');
+  const listaEl = document.getElementById('gestion-lista');
+  const input = document.getElementById('gestion-nuevo');
+  const modal = document.getElementById('modal-gestionar');
+
+  titulo.textContent = tipo === 'docente' ? 'Gestionar Docentes' : 'Gestionar Módulos';
+  input.value = '';
+  listaEl.innerHTML = '';
+
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'gestion-item';
+    row.innerHTML = `
+      <span>${item}</span>
+      <button type="button" class="btn-delete-item" data-idx="${idx}" title="Eliminar">✕</button>
+    `;
+    listaEl.appendChild(row);
+  });
+
+  listaEl.querySelectorAll('.btn-delete-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.idx);
+      listas[tipo].splice(idx, 1);
+      saveListas(listas);
+      abrirModal(tipo); // refresh
+      populateAllSelects();
+    });
+  });
+
+  modal.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+}
+
+function cerrarModal() {
+  document.getElementById('modal-gestionar').style.display = 'none';
+  modalTarget = null;
+}
+
+document.getElementById('modal-cerrar')?.addEventListener('click', cerrarModal);
+document.getElementById('btn-add-opcion')?.addEventListener('click', () => {
+  const input = document.getElementById('gestion-nuevo');
+  const val = input.value.trim();
+  if (!val || !modalTarget) return;
+  const listas = getListas();
+  if (!listas[modalTarget].includes(val)) {
+    listas[modalTarget].push(val);
+    saveListas(listas);
+    populateAllSelects();
+    abrirModal(modalTarget); // refresh
+  }
+  input.value = '';
+  input.focus();
+});
+
+document.querySelectorAll('.btn-gestionar').forEach(btn => {
+  btn.addEventListener('click', () => abrirModal(btn.dataset.target));
+});
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('modal-gestionar')?.addEventListener('click', (e) => {
+  if (e.target.id === 'modal-gestionar') cerrarModal();
+});
+
 // ── Theme toggle ───────────────────────────────────────────
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
@@ -44,7 +158,6 @@ function getFormData() {
     grupo: document.getElementById('grupo')?.value || '',
     modulo: document.getElementById('modulo')?.value || '',
     nombre_proyecto: document.getElementById('nombre_proyecto')?.value || '',
-    cantidad: document.getElementById('cantidad')?.value || '1',
     estado: document.getElementById('estado')?.value || 'Por comprar',
     material_solicitado: document.getElementById('material_solicitado')?.value || '',
     descripcion_enlace: document.getElementById('descripcion_enlace')?.value || '',
@@ -60,7 +173,6 @@ function restoreForm(data) {
   if (data.grupo && document.getElementById('grupo')) document.getElementById('grupo').value = data.grupo;
   if (data.modulo && document.getElementById('modulo')) document.getElementById('modulo').value = data.modulo;
   if (data.nombre_proyecto && document.getElementById('nombre_proyecto')) document.getElementById('nombre_proyecto').value = data.nombre_proyecto;
-  if (data.cantidad && document.getElementById('cantidad')) document.getElementById('cantidad').value = data.cantidad;
   if (data.estado && document.getElementById('estado')) document.getElementById('estado').value = data.estado;
   if (data.material_solicitado && document.getElementById('material_solicitado')) document.getElementById('material_solicitado').value = data.material_solicitado;
   if (data.descripcion_enlace && document.getElementById('descripcion_enlace')) document.getElementById('descripcion_enlace').value = data.descripcion_enlace;
@@ -87,7 +199,6 @@ function clearBorrador() {
   if (borradorIndicator) borradorIndicator.style.display = 'none';
 }
 
-// Restaurar borrador al cargar
 (function restoreDraft() {
   try {
     const saved = localStorage.getItem(DRAFT_KEY);
@@ -95,24 +206,16 @@ function clearBorrador() {
       const data = JSON.parse(saved);
       restoreForm(data);
     }
-  } catch (e) {
-    // Ignorar errores de parseo
-  }
+  } catch (e) { /* ignore */ }
 })();
 
-// Auto-guardar con debounce
 function debounce(fn, ms) {
   let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
 }
 
 const debouncedGuardar = debounce(guardarBorrador, 500);
-if (form) {
-  form.addEventListener('input', debouncedGuardar);
-}
+if (form) form.addEventListener('input', debouncedGuardar);
 
 // ── Colores de estado ────────────────────────────────────
 const coloresEstado = {
@@ -140,11 +243,10 @@ function renderizarLista(solicitudes) {
   solicitudes.forEach(s => {
     const div = document.createElement('div');
     div.className = 'solicitud-card';
-    div.dataset.estado = s.estado;
     div.innerHTML = `
       <div class="solicitud-header">
         <strong>${s.numero_solicitud ? s.numero_solicitud + ' — ' : ''}${s.docente || s.nombre_profesor || '-'}</strong>
-        ${colorBadge(s.estado)}
+        ${colorBadge(s.urgencia || s.estado || 'Por comprar')}
         <button class="btn-eliminar" data-id="${s.id}" title="Eliminar">✕</button>
       </div>
       <div class="solicitud-body">
@@ -153,7 +255,6 @@ function renderizarLista(solicitudes) {
         <p><strong>Módulo:</strong> ${s.modulo || '-'}</p>
         <p><strong>Proyecto:</strong> ${s.nombre_proyecto || '-'}</p>
         <p><strong>Material:</strong> ${s.material_solicitado}</p>
-        <p><strong>Cantidad:</strong> ${s.cantidad}</p>
         ${s.descripcion_enlace ? `<p><strong>Descripción:</strong> ${s.descripcion_enlace}</p>` : ''}
         ${s.donde_comprar ? `<p><strong>Dónde comprar:</strong> ${s.donde_comprar}</p>` : ''}
         ${s.comentarios ? `<p><strong>Comentarios:</strong> ${s.comentarios}</p>` : ''}
@@ -182,7 +283,6 @@ async function cargarSolicitudes() {
 
     let datos = await getSolicitudes(estadoFiltro, moduloFiltro);
 
-    // Filtro global adicional
     if (textoBuscador) {
       datos = datos.filter(s =>
         (s.docente || s.nombre_profesor || '').toLowerCase().includes(textoBuscador) ||
@@ -199,7 +299,7 @@ async function cargarSolicitudes() {
     renderizarLista(datos);
     if (mensajeError) mensajeError.textContent = '';
   } catch (e) {
-    if (mensajeError) mensajeError.textContent = 'Error al cargar solicitudes: ' + e.message;
+    if (mensajeError) mensajeError.textContent = 'Error al cargar: ' + e.message;
   }
 }
 
@@ -216,8 +316,7 @@ if (form) {
       grupo_curso: document.getElementById('grupo').value,
       modulo: document.getElementById('modulo').value,
       material_solicitado: document.getElementById('material_solicitado').value.trim(),
-      cantidad: Number(document.getElementById('cantidad').value),
-      urgencia: document.getElementById('estado').value, // mantener compatibilidd con BDD
+      urgencia: document.getElementById('estado').value,
       nombre_proyecto: document.getElementById('nombre_proyecto').value.trim(),
       descripcion_enlace: document.getElementById('descripcion_enlace').value.trim(),
       donde_comprar: document.getElementById('donde_comprar').value.trim(),
@@ -239,7 +338,7 @@ if (form) {
       }
       form.reset();
       if (fechaInput) fechaInput.value = hoy;
-      // Redirigir a la tabla
+      populateAllSelects();
       window.location.href = 'solicitudes.html';
     } catch (e) {
       if (mensajeError) mensajeError.textContent = 'Error al enviar: ' + e.message;
@@ -252,7 +351,8 @@ if (filtroEstado) filtroEstado.addEventListener('change', cargarSolicitudes);
 if (filtroModulo) filtroModulo.addEventListener('change', cargarSolicitudes);
 if (buscadorGlobal) buscadorGlobal.addEventListener('input', debounce(cargarSolicitudes, 300));
 
-// Carga inicial (index.html)
+// ── Init selects + carga ──────────────────────────────────
+populateAllSelects();
 if (lista) cargarSolicitudes();
 
 // ── Registrar Service Worker ───────────────────────────────
@@ -263,9 +363,7 @@ if ('serviceWorker' in navigator) {
 // ── PWA Install Banner ─────────────────────────────────────
 const PWA_BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';
 
-function isIOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
+function isIOS() { return /iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
 function showBanner() {
   const banner = document.getElementById('pwa-install-banner');
@@ -288,27 +386,17 @@ function hideBanner() {
   localStorage.setItem(PWA_BANNER_DISMISSED_KEY, '1');
 }
 
-const bannerCloseBtn = document.getElementById('pwa-banner-close');
-if (bannerCloseBtn) {
-  bannerCloseBtn.addEventListener('click', hideBanner);
-}
+document.getElementById('pwa-banner-close')?.addEventListener('click', hideBanner);
 
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (!localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) {
-    showBanner();
-  }
+  if (!localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) showBanner();
 });
 
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  hideBanner();
-});
+window.addEventListener('appinstalled', () => { deferredPrompt = null; hideBanner(); });
 
 window.addEventListener('DOMContentLoaded', () => {
-  if (isIOS() && !localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) {
-    showBanner();
-  }
+  if (isIOS() && !localStorage.getItem(PWA_BANNER_DISMISSED_KEY)) showBanner();
 });
