@@ -34,45 +34,127 @@
     <section class="card" id="seccion-formulario">
       <h2>Nueva Solicitud</h2>
       <form id="form-solicitud" autocomplete="off">
+
         <div class="form-grid">
           <div class="campo">
             <label for="fecha">Fecha *</label>
             <input type="date" id="fecha" required />
           </div>
+
           <div class="campo">
-            <label for="nombre_profesor">Profesor/a *</label>
-            <input type="text" id="nombre_profesor" required placeholder="Nombre completo" />
+            <label for="docente">Docente *</label>
+            <select id="docente" required>
+              <option value="">Seleccionar docente...</option>
+              <option value="Enrique">Enrique</option>
+              <option value="Juan Carlos">Juan Carlos</option>
+              <option value="Álvaro">Álvaro</option>
+              <option value="Nico">Nico</option>
+              <option value="Pepa">Pepa</option>
+              <option value="Laura">Laura</option>
+              <option value="Germán">Germán</option>
+              <option value="Saskia">Saskia</option>
+              <option value="Jonás">Jonás</option>
+            </select>
           </div>
+
           <div class="campo">
             <label for="grupo">Grupo</label>
-            <input type="text" id="grupo" placeholder="Ej: 1º CFGM" />
+            <select id="grupo">
+              <option value="">Seleccionar grupo...</option>
+              <option value="1º CFGB">1º CFGB</option>
+              <option value="2º CFGB">2º CFGB</option>
+              <option value="1º CFGM">1º CFGM</option>
+              <option value="2º CFGM">2º CFGM</option>
+              <option value="1º CFGS">1º CFGS</option>
+              <option value="2º CFGS">2º CFGS</option>
+              <option value="Otro">Otro</option>
+            </select>
           </div>
+
           <div class="campo">
             <label for="modulo">Módulo</label>
-            <input type="text" id="modulo" placeholder="Ej: Sistemas Informáticos" />
+            <select id="modulo">
+              <option value="">Seleccionar módulo...</option>
+              <option value="DDR">DDR</option>
+              <option value="DRP">DRP</option>
+              <option value="GNE">GNE</option>
+              <option value="RRC">RRC</option>
+              <option value="SOJ">SOJ</option>
+              <option value="ABD">ABD</option>
+              <option value="DHI">DHI</option>
+              <option value="DJK">DJK</option>
+              <option value="MLU">MLU</option>
+              <option value="PXE">PXE</option>
+              <option value="A10">A10</option>
+              <option value="MC4">MC4</option>
+              <option value="OAA">OAA</option>
+              <option value="PVW">PVW</option>
+              <option value="DCU">DCU</option>
+              <option value="MRN">MRN</option>
+              <option value="PUB">PUB</option>
+              <option value="SOV">SOV</option>
+              <option value="ATZ">ATZ</option>
+              <option value="EB1">EB1</option>
+              <option value="PMB">PMB</option>
+              <option value="AAD">AAD</option>
+              <option value="MCR">MCR</option>
+              <option value="OPP">OPP</option>
+              <option value="CDA">CDA</option>
+              <option value="NCI">NCI</option>
+              <option value="OPZ">OPZ</option>
+              <option value="PZ1">PZ1</option>
+              <option value="TUO">TUO</option>
+              <option value="ILB">ILB</option>
+              <option value="IUD">IUD</option>
+              <option value="TPZ">TPZ</option>
+              <option value="FAT">FAT</option>
+              <option value="IYO">IYO</option>
+              <option value="MJC">MJC</option>
+              <option value="Departamento">Departamento</option>
+            </select>
           </div>
+
           <div class="campo">
             <label for="nombre_proyecto">Nombre del Proyecto</label>
             <input type="text" id="nombre_proyecto" placeholder="Ej: App Móvil" />
           </div>
+
           <div class="campo">
             <label for="cantidad">Cantidad</label>
             <input type="number" id="cantidad" min="1" value="1" />
           </div>
         </div>
 
-        <div class="campo">
-          <label for="urgencia">Urgencia</label>
-          <select id="urgencia">
-            <option value="Normal">Normal</option>
-            <option value="Pronto">Pronto</option>
-            <option value="Urgente">Urgente</option>
-          </select>
+        <div class="form-grid">
+          <div class="campo">
+            <label for="estado">Estado</label>
+            <select id="estado">
+              <option value="Por comprar">Por comprar</option>
+              <option value="Comprado">Comprado</option>
+              <option value="Recibido">Recibido</option>
+              <option value="Anulado">Anulado</option>
+            </select>
+          </div>
         </div>
 
         <div class="campo">
           <label for="material_solicitado">Material solicitado *</label>
-          <textarea id="material_solicitado" required rows="3" placeholder="Describe el material que necesitas..."></textarea>
+          <textarea id="material_solicitado" required rows="2" placeholder="Describe el material que necesitas..."></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="descripcion_enlace">Descripción / Enlace</label>
+          <input type="text" id="descripcion_enlace" placeholder="URL del producto, especificaciones..." />
+        </div>
+
+        <div class="campo">
+          <label for="donde_comprar">¿Dónde comprar?</label>
+          <input type="text" id="donde_comprar" placeholder="Ej: Ferretería Guanarteme" />
+        </div>
+
+        <div class="campo">
+          <label for="comentarios">Comentarios</label>
+          <textarea id="comentarios" rows="2" placeholder="Notas adicionales..."></textarea>
         </div>
 
         <div id="borrador-indicator" class="borrador-indicator"></div>
@@ -92,17 +174,60 @@
 
       <div class="filtros">
         <div class="filtro-campo">
-          <label for="filtro-urgencia">Filtrar por urgencia</label>
-          <select id="filtro-urgencia">
+          <label for="filtro-estado">Filtrar por estado</label>
+          <select id="filtro-estado">
             <option value="">Todas</option>
-            <option value="Normal">Normal</option>
-            <option value="Pronto">Pronto</option>
-            <option value="Urgente">Urgente</option>
+            <option value="Por comprar">Por comprar</option>
+            <option value="Comprado">Comprado</option>
+            <option value="Recibido">Recibido</option>
+            <option value="Anulado">Anulado</option>
           </select>
         </div>
         <div class="filtro-campo">
           <label for="filtro-modulo">Filtrar por módulo</label>
-          <input type="text" id="filtro-modulo" placeholder="Nombre del módulo..." />
+          <select id="filtro-modulo">
+            <option value="">Todos</option>
+            <option value="DDR">DDR</option>
+            <option value="DRP">DRP</option>
+            <option value="GNE">GNE</option>
+            <option value="RRC">RRC</option>
+            <option value="SOJ">SOJ</option>
+            <option value="ABD">ABD</option>
+            <option value="DHI">DHI</option>
+            <option value="DJK">DJK</option>
+            <option value="MLU">MLU</option>
+            <option value="PXE">PXE</option>
+            <option value="A10">A10</option>
+            <option value="MC4">MC4</option>
+            <option value="OAA">OAA</option>
+            <option value="PVW">PVW</option>
+            <option value="DCU">DCU</option>
+            <option value="MRN">MRN</option>
+            <option value="PUB">PUB</option>
+            <option value="SOV">SOV</option>
+            <option value="ATZ">ATZ</option>
+            <option value="EB1">EB1</option>
+            <option value="PMB">PMB</option>
+            <option value="AAD">AAD</option>
+            <option value="MCR">MCR</option>
+            <option value="OPP">OPP</option>
+            <option value="CDA">CDA</option>
+            <option value="NCI">NCI</option>
+            <option value="OPZ">OPZ</option>
+            <option value="PZ1">PZ1</option>
+            <option value="TUO">TUO</option>
+            <option value="ILB">ILB</option>
+            <option value="IUD">IUD</option>
+            <option value="TPZ">TPZ</option>
+            <option value="FAT">FAT</option>
+            <option value="IYO">IYO</option>
+            <option value="MJC">MJC</option>
+            <option value="Departamento">Departamento</option>
+          </select>
+        </div>
+        <div class="filtro-campo filtro-buscador">
+          <label for="buscador-global">Buscar</label>
+          <input type="text" id="buscador-global" placeholder="Buscar en toda la solicitud..." />
         </div>
       </div>
 
@@ -119,4 +244,3 @@
   <script type="module" src="app.js"></script>
 </body>
 </html>
-
