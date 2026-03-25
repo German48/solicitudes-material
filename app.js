@@ -386,6 +386,17 @@ function hideBanner() {
 
 document.getElementById('pwa-banner-close')?.addEventListener('click', hideBanner);
 
+const installBtn = document.getElementById('pwa-install-btn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') hideBanner();
+  });
+}
+
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
