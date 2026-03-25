@@ -158,7 +158,6 @@ function getFormData() {
     grupo: document.getElementById('grupo')?.value || '',
     modulo: document.getElementById('modulo')?.value || '',
     nombre_proyecto: document.getElementById('nombre_proyecto')?.value || '',
-    estado: document.getElementById('estado')?.value || 'Por comprar',
     material_solicitado: document.getElementById('material_solicitado')?.value || '',
     descripcion_enlace: document.getElementById('descripcion_enlace')?.value || '',
     donde_comprar: document.getElementById('donde_comprar')?.value || '',
@@ -173,7 +172,6 @@ function restoreForm(data) {
   if (data.grupo && document.getElementById('grupo')) document.getElementById('grupo').value = data.grupo;
   if (data.modulo && document.getElementById('modulo')) document.getElementById('modulo').value = data.modulo;
   if (data.nombre_proyecto && document.getElementById('nombre_proyecto')) document.getElementById('nombre_proyecto').value = data.nombre_proyecto;
-  if (data.estado && document.getElementById('estado')) document.getElementById('estado').value = data.estado;
   if (data.material_solicitado && document.getElementById('material_solicitado')) document.getElementById('material_solicitado').value = data.material_solicitado;
   if (data.descripcion_enlace && document.getElementById('descripcion_enlace')) document.getElementById('descripcion_enlace').value = data.descripcion_enlace;
   if (data.donde_comprar && document.getElementById('donde_comprar')) document.getElementById('donde_comprar').value = data.donde_comprar;
@@ -316,7 +314,7 @@ if (form) {
       grupo_curso: document.getElementById('grupo').value,
       modulo: document.getElementById('modulo').value,
       material_solicitado: document.getElementById('material_solicitado').value.trim(),
-      urgencia: document.getElementById('estado').value,
+      urgencia: 'Por comprar',
       nombre_proyecto: document.getElementById('nombre_proyecto').value.trim(),
       descripcion_enlace: document.getElementById('descripcion_enlace').value.trim(),
       donde_comprar: document.getElementById('donde_comprar').value.trim(),
