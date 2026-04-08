@@ -1,4 +1,4 @@
-const CACHE_NAME = 'solicitudes-material-v3';
+const CACHE_NAME = 'solicitudes-material-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -7,8 +7,12 @@ const ASSETS = [
   './app.js',
   './supabase.js',
   './manifest.json',
+  './favicon.svg',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './maskable-192.png',
+  './maskable-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {

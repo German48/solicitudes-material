@@ -355,7 +355,7 @@ if (lista) cargarSolicitudes();
 
 // ── Registrar Service Worker ───────────────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: '/solicitudes-material/' }).catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // ── PWA Install Banner ─────────────────────────────────────
