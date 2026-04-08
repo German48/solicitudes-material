@@ -149,8 +149,9 @@ textarea { resize: vertical; }
 
 /* Mensajes */
 .mensaje { padding: .5rem .75rem; border-radius: var(--radius); font-size: .85rem; margin-top: .5rem; display: none; }
-.mensaje.error { background: #fef2f2; color: var(--rojo); display: block; }
-.mensaje.exito { background: #f0fdf4; color: var(--verde); display: block; }
+.mensaje:not(:empty) { display: block; }
+.mensaje.error { background: #fef2f2; color: var(--rojo); }
+.mensaje.exito { background: #f0fdf4; color: var(--verde); }
 body.dark .mensaje.error { background: #450a0a; }
 body.dark .mensaje.exito { background: #052e16; }
 
