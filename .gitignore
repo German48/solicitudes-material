@@ -1,0 +1,19 @@
+# Supabase Local Development
+.env
+.env.local
+.env.production
+.env.example
+
+# Supabase CLI generated directories
+supabase/.branches/
+supabase/.temp/
+
+# OS specific files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
